@@ -7,6 +7,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.Date;
 
@@ -27,9 +29,13 @@ public class CovidService
                     .getBody();
 
             assert timeServerResponse != null;
-            LocalDateTime date = LocalDateTime.parse(timeServerResponse.getLocalTime());
-            int currentDay = date.getDayOfMonth();
-            int currentMonth = date.getMonthValue();
+            //
+            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+            Date date = format.parse(timeServerResponse.getLocalTime());
+            //
+            /*LocalDateTime date = LocalDateTime.parse(timeServerResponse.getLocalTime()); */
+            int currentDay = date.getDay();
+            int currentMonth = date.getMonth();
             int currentYear = date.getYear();
 
             String daysLeftOfQuarantine = " ";
@@ -62,7 +68,7 @@ public class CovidService
             }
             return daysLeftOfQuarantine;
 
-        } catch (RestClientException e) {
+        } catch (RestClientException | ParseException e) {
             //nothing
         }
         return null;
