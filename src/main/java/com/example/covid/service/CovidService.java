@@ -10,7 +10,9 @@ import org.springframework.web.client.RestTemplate;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
@@ -29,29 +31,25 @@ public class CovidService
                     .getBody();
 
             assert timeServerResponse != null;
-            //
+
             SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-            Date date = format.parse(timeServerResponse.getLocalTime());
-            //
-            /*LocalDateTime date = LocalDateTime.parse(timeServerResponse.getLocalTime()); */
-            int currentDay = date.getDay();
-            int currentMonth = date.getMonth();
-            int currentYear = date.getYear();
+            Date currentDate = format.parse(timeServerResponse.getLocalTime());
+            Date exposureDate = new Date (year, month, day);
 
             String daysLeftOfQuarantine = " ";
             String quarantineFinished = "Your quarantine is already finished!!!";
             String dateInvalid = "Sorry, your exposure date is invalid. It has not happened yet.";
-            ////
-            Date currentDate = new Date (currentYear, currentMonth, currentDay);
-            Date exposureDate = new Date (year, month, day);
 
             if (currentDate.before(exposureDate))
             {
-                daysLeftOfQuarantine = dateInvalid;
+                daysLeftOfQuarantine = dateInvalid + " Used the before method. Current Date = " + currentDate + " and Exposure Date is " + exposureDate;
             }
             else
             {
-                long daysBetween = currentDate.getTime() - exposureDate.getTime();
+                long milliSecondsBetween = currentDate.getTime() - exposureDate.getTime();
+                float daysBetween = TimeUnit.DAYS.convert(milliSecondsBetween, TimeUnit.MILLISECONDS);
+
+
                 System.out.println(daysBetween);
                 if (daysBetween < 0)
                 {
