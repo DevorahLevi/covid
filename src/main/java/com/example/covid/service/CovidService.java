@@ -7,12 +7,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.concurrent.TimeUnit;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 
 @Service
 @RequiredArgsConstructor
@@ -32,41 +28,37 @@ public class CovidService
 
             assert timeServerResponse != null;
 
-            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-            Date currentDate = format.parse(timeServerResponse.getLocalTime());
-            Date exposureDate = new Date (year, month, day);
+            LocalDate currentDate = LocalDate.parse(timeServerResponse.getLocalTime());
+            LocalDate exposureDate = LocalDate.of(year, month, day);
 
             String daysLeftOfQuarantine = " ";
             String quarantineFinished = "Your quarantine is already finished!!!";
             String dateInvalid = "Sorry, your exposure date is invalid. It has not happened yet.";
 
-            if (currentDate.before(exposureDate))
+            if (currentDate.compareTo(exposureDate) < 0)
             {
-                daysLeftOfQuarantine = dateInvalid + " Used the before method. Current Date = " + currentDate + " and Exposure Date is " + exposureDate;
+                daysLeftOfQuarantine = dateInvalid;
             }
             else
             {
-                long milliSecondsBetween = currentDate.getTime() - exposureDate.getTime();
-                float daysBetween = TimeUnit.DAYS.convert(milliSecondsBetween, TimeUnit.MILLISECONDS);
+                long daysBetween = ChronoUnit.DAYS.between(exposureDate, currentDate);
+                long daysLeft = 14 - daysBetween;
 
-
-                System.out.println(daysBetween);
-                if (daysBetween < 0)
-                {
+                if (daysLeft <= 0) {
                     daysLeftOfQuarantine = quarantineFinished;
-                }
-                else if (daysBetween > 14)
+                } else
                 {
-                    daysLeftOfQuarantine = dateInvalid;
-                }
-                else
-                {
-                    daysLeftOfQuarantine = "You have " + daysBetween + " days left until you're done with quarantine. Good luck!";
+                    if (daysLeft == 1)
+                    {
+                        daysLeftOfQuarantine = "You have " + daysLeft + " day left until you're done with quarantine. Good luck!";
+                    } else {
+                        daysLeftOfQuarantine = "You have " + daysLeft + " days left until you're done with quarantine. Good luck!";
+                    }
                 }
             }
             return daysLeftOfQuarantine;
 
-        } catch (RestClientException | ParseException e) {
+        } catch (RestClientException e) {
             //nothing
         }
         return null;
