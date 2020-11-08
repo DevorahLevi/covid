@@ -26,6 +26,6 @@ public class CovidController
     @PostMapping("/date")
     public String getQuarantineTimeWithPost(@RequestBody Date date)
     {
-        return covidService.getQuarantineTime(date.getYear(), date.getMonth(), date.getDay());
+        return covidService.getQuarantineTime(date);
     }
 }

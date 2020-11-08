@@ -1,5 +1,6 @@
 package com.example.covid.service;
 
+import com.example.covid.model.Date;
 import com.example.covid.model.TimeServerResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpMethod;
@@ -7,7 +8,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 
@@ -17,10 +17,16 @@ public class CovidService
 {
     private final RestTemplate restTemplate;
 
+    public String getQuarantineTime(Date date)
+    {
+        return this.getQuarantineTime(date.getYear(), date.getMonth(), date.getDay());
+    }
+
     public String getQuarantineTime(int year, int month, int day)
     {
+        TimeServerResponse timeServerResponse;
         try {
-            TimeServerResponse timeServerResponse =
+            timeServerResponse =
                     restTemplate.exchange("http://localhost:8080/api/v1/getTime",
                     HttpMethod.GET,
                     null,
